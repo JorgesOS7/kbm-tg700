@@ -1,0 +1,13 @@
+# build output (os .deb são publicados como Release no GitHub)
+build/
+dist/
+*.deb
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Nunca versionar arquivos do software original do fabricante
+*.exe
+*.dll
+vendor/

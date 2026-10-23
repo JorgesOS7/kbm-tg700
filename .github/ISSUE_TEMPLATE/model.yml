@@ -1,0 +1,24 @@
+name: Testei em outro modelo
+description: Relate como o app funciona no seu teclado (ajuda a ampliar o suporte)
+labels: [hardware]
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Modelo e VID:PID (`lsusb`)
+      placeholder: TG600 4a4c:e987
+    validations:
+      required: true
+  - type: checkboxes
+    id: works
+    attributes:
+      label: O que funcionou
+      options:
+        - label: Iluminação
+        - label: Macros
+        - label: Remapear teclas
+        - label: Testar teclas
+  - type: textarea
+    id: notes
+    attributes:
+      label: Observações

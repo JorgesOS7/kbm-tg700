@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=KBM TG700 Control
+GenericName=Controle do teclado
+Comment=Iluminação RGB, macros e teclas do teclado KBM! GAMING TG600/TG700
+Exec=kbm-tg700
+Icon=br.com.kbm.TG700Control
+Terminal=false
+Categories=Settings;HardwareSettings;Utility;
+Keywords=keyboard;teclado;rgb;macro;kbm;kabum;tg700;tg600;
+StartupNotify=true

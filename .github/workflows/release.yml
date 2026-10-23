@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Conferir versão
+        run: |
+          VERSION=$(python3 -c "import kbm_tg700; print(kbm_tg700.__version__)")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME não bate com a versão $VERSION em kbm_tg700/__init__.py"
+            exit 1
+          fi
+
+      - name: Testes
+        run: python3 -m unittest discover -s tests
+
+      - name: Gerar .deb
+        run: ./build-deb.sh
+
+      - name: Publicar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          awk -v v="## $VERSION" '$0==v{f=1;next} /^## /{f=0} f' CHANGELOG.md > notes.md
+          gh release create "$GITHUB_REF_NAME" dist/*.deb --title "$GITHUB_REF_NAME" --notes-file notes.md
