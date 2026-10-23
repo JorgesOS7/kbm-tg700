@@ -2,6 +2,9 @@
 
 Obrigado pelo interesse! Issues e pull requests são bem-vindos, em português ou inglês.
 
+Antes de mexer no protocolo, leia o [CLAUDE.md](CLAUDE.md): ele resume as armadilhas do projeto
+(o mapa de teclas regrava as 132 posições, a camada Fn não é gravada, etc.).
+
 ## Estrutura
 
 | Caminho | Conteúdo |

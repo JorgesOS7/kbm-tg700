@@ -1,4 +1,14 @@
-# KBM TG700 Control para Linux
+<p align="center">
+  <img src="packaging/br.com.kbm.TG700Control.svg" alt="Logo do KBM TG700 Control" width="128" height="128">
+</p>
+
+<h1 align="center">KBM TG700 Control para Linux</h1>
+
+<p align="center">
+  <a href="https://github.com/JorgesOS7/kbm-tg700/actions/workflows/ci.yml"><img src="https://github.com/JorgesOS7/kbm-tg700/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/JorgesOS7/kbm-tg700/releases/latest"><img src="https://img.shields.io/github/v/release/JorgesOS7/kbm-tg700" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue" alt="Licença MIT"></a>
+</p>
 
 App nativo para Linux (GTK4 + libadwaita) que substitui o software oficial de Windows dos teclados
 **KBM! GAMING TG600 / TG700** (USB `4a4c:e987`, chip JieLi).
