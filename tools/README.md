@@ -8,4 +8,5 @@ Scripts usados durante a engenharia reversa, com o teclado conectado.
 | `identify_modes.py` | Aplica cada modo de luz e pergunta o que você vê |
 | `identify_colortype.py` | Descobre o efeito do byte de tipo de cor e das direções |
 | `test_macro.py` | Grava uma macro de teste na tecla Home (digita "kbm") |
+| `screenshots.py` | Regenera `docs/screenshots/` com um perfil de demonstração (não grava nada no teclado) |
 | `modes_observed.json` | Resultado do `identify_modes.py` no TG700 |

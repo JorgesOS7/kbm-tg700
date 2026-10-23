@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+- Janela Sobre com autor, créditos, notas da versão, links e informações de depuração.
+- O número de série do teclado não aparece mais na barra superior.
+- Screenshots do app no README.
+
 ## 1.0.0
 
 Primeira versão pública.

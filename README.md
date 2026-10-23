@@ -26,6 +26,20 @@ App nativo para Linux (GTK4 + libadwaita) que substitui o software oficial de Wi
 - **Testar teclas:** mostra o código HID bruto enviado por cada tecla (útil para achar defeitos)
 - Tudo fica gravado na memória do teclado e funciona em qualquer computador, sem o app aberto
 
+## Screenshots
+
+| Iluminação | Macros |
+|---|---|
+| ![Aba Iluminação: modo, brilho, velocidade, direção e cor](docs/screenshots/iluminacao.png) | ![Aba Macros: gravação e lista de eventos](docs/screenshots/macros.png) |
+
+| Teclas | Testar teclas |
+|---|---|
+| ![Aba Teclas: teclado com teclas remapeadas e macros](docs/screenshots/teclas.png) | ![Aba Testar teclas: teclas testadas e códigos HID](docs/screenshots/testar-teclas.png) |
+
+<p align="center">
+  <img src="docs/screenshots/sobre.png" alt="Janela Sobre" width="560">
+</p>
+
 ## Instalação (Ubuntu / Debian)
 
 Baixe o `.deb` da última versão em [Releases](https://github.com/JorgesOS7/kbm-tg700/releases) e instale:

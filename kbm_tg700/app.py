@@ -23,12 +23,33 @@ APP_ID = "br.com.kbm.TG700Control"
 DIRECTIONS = ["Horário", "Anti-horário", "Esquerda", "Direita", "Baixo", "Cima"]
 MOUSE_NAMES = {MOUSE_LEFT: "Clique esquerdo", MOUSE_RIGHT: "Clique direito", MOUSE_MIDDLE: "Clique do meio"}
 
+RELEASE_NOTES = """
+<p>Nesta versão:</p>
+<ul>
+  <li>Janela Sobre com autor, créditos, notas da versão e informações de depuração</li>
+  <li>O número de série do teclado não aparece mais na barra superior</li>
+  <li>Screenshots do app no README</li>
+</ul>
+"""
+
+
+def usb_id(hidraw_path):
+    """'4a4c:e987'-style id of a /dev/hidrawN node, read from sysfs."""
+    try:
+        with open(f"/sys/class/hidraw/{os.path.basename(hidraw_path)}/device/uevent") as f:
+            hid_id = next(l.split("=", 1)[1] for l in f.read().splitlines() if l.startswith("HID_ID="))
+        _, vid, pid = hid_id.strip().split(":")
+        return f"{int(vid, 16):04x}:{int(pid, 16):04x}"
+    except (OSError, StopIteration, ValueError):
+        return "?"
+
 CSS = b"""
 .kbd-key { min-width: 0; min-height: 0; padding: 0; font-size: 0.8em; }
 .kbd-key.bound-macro { background: alpha(@accent_bg_color, 0.55); color: @accent_fg_color; }
 .kbd-key.bound-key { background: alpha(@warning_bg_color, 0.55); }
 .kbd-key.bound-disabled { background: alpha(@error_bg_color, 0.45); }
 .kbd-key.selected { outline: 2px solid @accent_color; }
+.kbd-key.legend { border-radius: 6px; padding: 4px 8px; }
 .recorder { border: 2px dashed alpha(@accent_color, 0.6); border-radius: 12px; padding: 18px; }
 .recorder.recording { border-color: @error_color; background: alpha(@error_color, 0.08); }
 .test-key { border-radius: 6px; background: alpha(@view_fg_color, 0.08); font-size: 0.8em; }
@@ -113,7 +134,10 @@ class Window(Adw.ApplicationWindow):
             self.device = None
             self.set_connected(False, str(e) or "Teclado não encontrado")
             return
-        self.set_connected(True, f"Conectado · SN {sn[:8]}…" if sn else "Conectado")
+        self.device_info = {"path": self.device.path, "usb_id": usb_id(self.device.path), "serial": sn,
+                            "modes": " ".join(f"{m:02x}" for m in modes), "max": (max_b, max_s)}
+        # the serial stays out of the header so screenshots and screen shares don't expose it
+        self.set_connected(True, f"Conectado · {self.model}")
         self.load_modes(modes, max_b, max_s)
 
     def set_connected(self, ok, text):
@@ -156,15 +180,60 @@ class Window(Adw.ApplicationWindow):
         dlg.connect("response", done)
         dlg.present()
 
+    def debug_info(self):
+        lines = [f"KBM TG700 Control {__version__}",
+                 f"Python {sys.version.split()[0]}",
+                 f"GTK {Gtk.get_major_version()}.{Gtk.get_minor_version()}.{Gtk.get_micro_version()}",
+                 f"libadwaita {Adw.get_major_version()}.{Adw.get_minor_version()}.{Adw.get_micro_version()}",
+                 f"Kernel {os.uname().release}",
+                 f"Modelo selecionado: {self.model}"]
+        info = getattr(self, "device_info", None)
+        if self.device and info:
+            lines += [f"Teclado: conectado em {info['path']} (USB {info['usb_id']})",
+                      f"Modos informados pelo firmware: {info['modes']}",
+                      f"Brilho/velocidade máximos: {info['max'][0]}/{info['max'][1]}",
+                      f"Estado do LED: {self.led.to_payload().hex() if self.led else '?'}"]
+        else:
+            lines.append("Teclado: não conectado")
+        lines.append(f"Macros no perfil: {len(self.profile['macros'])}, "
+                     f"teclas remapeadas: {len(self.profile['bindings'])}")
+        return "\n".join(lines)
+
     def on_about(self, *_):
-        Adw.AboutWindow(transient_for=self, application_name="KBM TG700 Control", version=__version__,
-                        application_icon=APP_ID, developer_name="José Jorge",
-                        website="https://github.com/JorgesOS7/kbm-tg700",
-                        issue_url="https://github.com/JorgesOS7/kbm-tg700/issues",
-                        comments="Controle de iluminação RGB, macros e teclas para os teclados "
-                                 "KBM! GAMING TG600/TG700 no Linux.\n\nProjeto independente, sem "
-                                 "afiliação com a KaBuM! ou a fabricante do teclado.",
-                        license_type=Gtk.License.MIT_X11).present()
+        props = dict(
+            application_name="KBM TG700 Control", version=__version__, application_icon=APP_ID,
+            developer_name="José Jorge",
+            developers=["José Jorge https://github.com/JorgesOS7"],
+            copyright="© 2026 José Jorge",
+            license_type=Gtk.License.MIT_X11,
+            website="https://github.com/JorgesOS7/kbm-tg700",
+            issue_url="https://github.com/JorgesOS7/kbm-tg700/issues",
+            comments="Controle de iluminação RGB, macros e teclas para os teclados KBM! GAMING "
+                     "TG600/TG700 no Linux. Tudo é gravado na memória do teclado e funciona em "
+                     "qualquer computador.",
+            release_notes_version=__version__,
+            release_notes=RELEASE_NOTES,
+            debug_info=self.debug_info(),
+            debug_info_filename="kbm-tg700-debug.txt",
+        )
+        about_cls = getattr(Adw, "AboutDialog", None)  # libadwaita >= 1.5
+        about = about_cls(**props) if about_cls else Adw.AboutWindow(transient_for=self, **props)
+        about.add_link("Documentação do protocolo",
+                       "https://github.com/JorgesOS7/kbm-tg700/blob/main/docs/PROTOCOL.md")
+        about.add_link("Como contribuir", "https://github.com/JorgesOS7/kbm-tg700/blob/main/CONTRIBUTING.md")
+        about.add_acknowledgement_section("Feito com", [
+            "GTK https://gtk.org", "libadwaita https://gnome.pages.gitlab.gnome.org/libadwaita/",
+            "PyGObject https://pygobject.gnome.org",
+            "Claude Code (engenharia reversa assistida por IA) https://claude.com/claude-code"])
+        about.add_legal_section(
+            "Marcas", None, Gtk.License.CUSTOM,
+            "Projeto independente e não oficial, sem afiliação com a KaBuM! ou com a fabricante do "
+            "teclado. KBM! GAMING, KaBuM!, TG600 e TG700 são marcas de seus respectivos donos e "
+            "aparecem apenas para indicar compatibilidade.")
+        if about_cls:
+            about.present(self)
+        else:
+            about.present()
 
     # ------------------------------------------------------------------ lighting
     def build_light_page(self):
@@ -301,7 +370,8 @@ class Window(Adw.ApplicationWindow):
                                           description="Crie uma macro com o botão + e grave as teclas.")
         self.macro_stack = Gtk.Stack()
         self.macro_stack.add_named(self.macro_empty, "empty")
-        self.macro_stack.add_named(Gtk.ScrolledWindow(child=self.macro_editor), "edit")
+        self.macro_stack.add_named(Gtk.ScrolledWindow(child=Adw.Clamp(child=self.macro_editor, maximum_size=720),
+                                                      hscrollbar_policy=Gtk.PolicyType.NEVER), "edit")
 
         prefs = Adw.PreferencesGroup()
         self.macro_name = Adw.EntryRow(title="Nome")
@@ -326,14 +396,17 @@ class Window(Adw.ApplicationWindow):
         self.rec_btn = Gtk.ToggleButton(label="● Gravar", css_classes=["destructive-action", "pill"])
         self.rec_btn.connect("toggled", self.on_record_toggled)
         rb.append(self.rec_btn)
-        for code in (MOUSE_LEFT, MOUSE_RIGHT, MOUSE_MIDDLE):
-            mb = Gtk.Button(label=MOUSE_NAMES[code], css_classes=["pill"])
-            mb.connect("clicked", self.on_add_mouse, code)
-            rb.append(mb)
         clear = Gtk.Button(label="Limpar", css_classes=["pill"])
         clear.connect("clicked", self.on_macro_clear_events)
         rb.append(clear)
         self.recorder.append(rb)
+        mouse = Gtk.Box(spacing=6, halign=Gtk.Align.CENTER)
+        mouse.append(Gtk.Label(label="Adicionar:", css_classes=["dim-label"]))
+        for code in (MOUSE_LEFT, MOUSE_RIGHT, MOUSE_MIDDLE):
+            mb = Gtk.Button(label=MOUSE_NAMES[code], css_classes=["pill", "flat"])
+            mb.connect("clicked", self.on_add_mouse, code)
+            mouse.append(mb)
+        self.recorder.append(mouse)
         keyctl = Gtk.EventControllerKey()
         keyctl.connect("key-pressed", self.on_rec_key, True)
         keyctl.connect("key-released", self.on_rec_key, False)
@@ -526,8 +599,7 @@ class Window(Adw.ApplicationWindow):
 
         legend = Gtk.Box(spacing=12, halign=Gtk.Align.CENTER)
         for css, txt in (("bound-key", "Remapeada"), ("bound-macro", "Macro"), ("bound-disabled", "Desativada")):
-            b = Gtk.Button(label=txt, css_classes=["kbd-key", css], sensitive=False, width_request=90)
-            legend.append(b)
+            legend.append(Gtk.Label(label=txt, css_classes=["kbd-key", "legend", css], width_request=100))
         box.append(legend)
 
         bottom = Gtk.Box(spacing=6, halign=Gtk.Align.END)
