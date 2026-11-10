@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.2
+
+- Corrige o remapeamento de teclas (e macros) voltando ao padrão depois de reiniciar o computador ou
+  reconectar o teclado: o firmware guarda o mapa em memória volátil. Agora o perfil salvo é regravado
+  automaticamente ao entrar na sessão e sempre que o teclado aparece (serviço de usuário, disparado
+  também pela regra udev), sem precisar abrir o app. Também dá para rodar manualmente com `kbm-tg700 --restore`.
+
 ## 1.1.0
 
 - Janela Sobre com autor, créditos, notas da versão, links e informações de depuração.

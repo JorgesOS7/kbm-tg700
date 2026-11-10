@@ -17,6 +17,9 @@ chmod 755 "$ROOT/usr/bin/kbm-tg700"
 install -D -m 644 packaging/br.com.kbm.TG700Control.desktop "$ROOT/usr/share/applications/br.com.kbm.TG700Control.desktop"
 install -D -m 644 packaging/br.com.kbm.TG700Control.svg "$ROOT/usr/share/icons/hicolor/scalable/apps/br.com.kbm.TG700Control.svg"
 install -D -m 644 packaging/70-kbm-tg700.rules "$ROOT/usr/lib/udev/rules.d/70-kbm-tg700.rules"
+install -D -m 644 packaging/kbm-tg700-restore.service "$ROOT/usr/lib/systemd/user/kbm-tg700-restore.service"
+install -d "$ROOT/usr/lib/systemd/user/default.target.wants"
+ln -s ../kbm-tg700-restore.service "$ROOT/usr/lib/systemd/user/default.target.wants/kbm-tg700-restore.service"
 install -D -m 644 README.md "$ROOT/usr/share/doc/kbm-tg700/README.md"
 
 cat > "$ROOT/DEBIAN/control" <<CTL
@@ -39,6 +42,7 @@ set -e
 if [ "$1" = configure ]; then
     udevadm control --reload-rules 2>/dev/null || true
     udevadm trigger --subsystem-match=hidraw --action=change 2>/dev/null || true
+    udevadm trigger --subsystem-match=usb --attr-match=idVendor=4a4c --action=add 2>/dev/null || true
     gtk-update-icon-cache -q /usr/share/icons/hicolor 2>/dev/null || true
 fi
 PI

@@ -39,6 +39,10 @@ depois `sudo udevadm control --reload-rules && sudo udevadm trigger`.
   `write_keymap` escreve todas as teclas a partir de `layouts.json`. Um código errado no layout quebra
   aquela tecla para todo mundo. Foi o caso do `/?` do TG700: o arquivo do fabricante dizia `0x38`
   (`;:` no ABNT2), o certo é `0x87`. Valide mudanças de layout na aba "Testar teclas".
+- **O mapa de teclas e as macros são voláteis.** Sobrevivem a reset de barramento USB, mas se perdem
+  quando o teclado perde energia (replug, reboot que corta a VBUS). Por isso `restore.py` regrava o
+  perfil salvo toda vez que o teclado aparece: regra udev (`SYSTEMD_USER_WANTS`) →
+  `kbm-tg700-restore.service` → `kbm-tg700 --restore`. Não existe comando de "salvar em flash" conhecido.
 - **Só a camada 0 (normal) é gravada.** A camada Fn existe (`[2]` = camada), mas os valores de fábrica
   dela são desconhecidos; gravá-la sem conhecê-los apaga as funções de Fn.
 - **A tecla Fn não envia nada ao computador.** Ela é resolvida no firmware (entrada `[1,0,0,0]`).

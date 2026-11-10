@@ -1,0 +1,11 @@
+[Unit]
+Description=Restaura macros e teclas remapeadas no teclado KBM! GAMING TG600/TG700
+Documentation=https://github.com/JorgesOS7/kbm-tg700
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/kbm-tg700 --restore
+
+[Install]
+# Also run at login: a keyboard that was already plugged in never triggers the udev hotplug path.
+WantedBy=default.target

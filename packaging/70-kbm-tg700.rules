@@ -1,3 +1,6 @@
 # KBM! GAMING TG600/TG700 (JieLi, VID 4a4c) - allow the logged-in user to access the vendor HID interface
 SUBSYSTEM=="hidraw", ATTRS{idVendor}=="4a4c", ATTRS{idProduct}=="e987|e988|e989", MODE="0660", TAG+="uaccess"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="4a4c", ATTRS{idProduct}=="e987|e988|e989", MODE="0660", TAG+="uaccess"
+# The firmware keeps macros/key bindings in volatile memory, so re-send the saved profile each time the
+# keyboard appears (boot, replug, resume). Runs the user service of the logged-in user.
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="4a4c", ATTR{idProduct}=="e987|e988|e989", TAG+="systemd", ENV{SYSTEMD_USER_WANTS}+="kbm-tg700-restore.service"
